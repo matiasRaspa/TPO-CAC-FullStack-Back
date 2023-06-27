@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/estilos.css" />
+    <title>Listado de productos</title>
+  </head>
+  <body>
+    <h1>Listado de Productos</h1>
+    <h3>Codo a Codo 2023</h3>
+
+    <div style="text-align: center">
+      <input type="text" id="codigo" placeholder="Código del producto" />
+      <button onclick="mostrarProducto()">Buscar Producto</button>
+      <button onclick="recargarLista()">Recargar Lista</button>
+    </div>
+
+    <table id="tabla-productos">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-productos">
+        <!-- El producto se cargará dinámicamente aquí -->
+      </tbody>
+    </table>
+    <div style="text-align: center">
+      <a href="../index.html">Menu principal</a>
+    </div>
+
+    <script>
+      const URL = "https://matiasraspa.pythonanywhere.com/";
+
+      // Función para recargar la lista de productos
+      function recargarLista() {
+        location.reload();
+      }
+
+      // Función para agregar un producto al carrito
+      function agregarAlCarrito(codigo) {
+        const cantidadSpan = document.getElementById(`cantidad-${codigo}`);
+        let cantidadCarrito = parseInt(cantidadSpan.innerText);
+        var productoAlCarrito = {
+          codigo: codigo,
+          cantidad: cantidadCarrito,
+        };
+        console.log(productoAlCarrito);
+        // Realizar una solicitud POST al carrito
+        fetch(URL + "carrito", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(productoAlCarrito),
+        })
+          .then(function (response) {
+            if (response.ok) {
+              return response.json(); // Parseamos la respuesta JSON
+            } else {
+              throw new Error("Error al agregar el producto al carrito.");
+            }
+          })
+          .then(function (data) {
+            alert("Producto agregado al carrito");
+            // Recargar página
+            location.reload();
+          })
+          .catch(function (error) {
+            console.log("Error:", error);
+            alert("Error al agregar el producto al carrito.");
+          });
+      }
+
+      // Función para mostrar el producto correspondiente al código ingresado
+      function mostrarProducto() {
+        const codigoProducto = document.getElementById("codigo").value;
+
+        fetch(URL + "productos/" + codigoProducto)
+          .then(function (response) {
+            if (response.ok) {
+              return response.json(); // Parsear la respuesta JSON
+            } else {
+              throw new Error("Error al obtener el producto.");
+            }
+          })
+          .then(function (producto) {
+            const tbody = document.getElementById("tbody-productos");
+            tbody.innerHTML = ""; // Limpiar el contenido anterior de la tabla
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${producto.codigo}</td>
+              <td>${producto.descripcion}</td>
+              <td>${producto.cantidad}</td>
+              <td>${producto.precio}</td>
+              <td>
+                <div>
+                  <button onclick="disminuirCantidad(${producto.codigo})">-</button>
+                  <span id="cantidad-${producto.codigo}">1</span>
+                  <button onclick="aumentarCantidad(${producto.codigo})">+</button>
+                  <button onclick="agregarAlCarrito(${producto.codigo})">Agregar al carrito</button>
+                </div>
+              </td>
+            `;
+            tbody.appendChild(row);
+          })
+          .catch(function (error) {
+            console.log("Error:", error);
+            alert("Error al obtener el producto.");
+          });
+
+        // Limpiar el número ingresado
+        document.getElementById("codigo").value = "";
+      }
+
+      // Obtener todos los productos del inventario y mostrarlos en la tabla inicialmente
+      fetch(URL + "productos")
+        .then(function (response) {
+          if (response.ok) {
+            return response.json(); // Parsear la respuesta JSON
+          } else {
+            throw new Error("Error al obtener los productos.");
+          }
+        })
+        .then(function (data) {
+          const tbody = document.getElementById("tbody-productos");
+          data.forEach(function (producto) {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td>${producto.codigo}</td>
+            <td>${producto.descripcion}</td>
+            <td>${producto.cantidad}</td>
+            <td>${producto.precio}</td>
+            <td>
+              <div>
+                <button onclick="disminuirCantidad(${producto.codigo})">-</button>
+                <span id="cantidad-${producto.codigo}">1</span>
+                <button onclick="aumentarCantidad(${producto.codigo})">+</button>
+                <button onclick="agregarAlCarrito(${producto.codigo})">Agregar al carrito</button>
+              </div>
+            </td>
+          `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(function (error) {
+          console.log("Error:", error);
+          alert("Error al obtener los productos.");
+        });
+
+      // Función para aumentar la cantidad de un producto
+      function aumentarCantidad(codigo) {
+        const cantidadSpan = document.getElementById(`cantidad-${codigo}`);
+        let cantidad = parseInt(cantidadSpan.innerText);
+        cantidad += 1;
+        cantidadSpan.innerText = cantidad;
+      }
+
+      // Función para disminuir la cantidad de un producto
+      function disminuirCantidad(codigo) {
+        const cantidadSpan = document.getElementById(`cantidad-${codigo}`);
+        let cantidad = parseInt(cantidadSpan.innerText);
+        if (cantidad > 1) {
+          cantidad -= 1;
+          cantidadSpan.innerText = cantidad;
+        }
+      }
+    </script>
+  </body>
+</html>

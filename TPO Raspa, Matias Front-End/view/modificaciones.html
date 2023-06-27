@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/estilos.css" />
+    <title>Modificar producto</title>
+  </head>
+  <body>
+    <h1>Modificar Producto</h1>
+    <h3>Codo a Codo 2023</h3>
+    <form id="formulario">
+      <input
+        type="text"
+        id="codigo"
+        name="codigo"
+        placeholder="Código"
+        required
+      /><br />
+      <input
+        type="text"
+        id="descripcion"
+        name="descripcion"
+        placeholder="Descripción"
+        required
+      /><br />
+      <input
+        type="number"
+        id="cantidad"
+        name="cantidad"
+        placeholder="Cantidad"
+        required
+      /><br />
+      <input
+        type="number"
+        step="0.01"
+        id="precio"
+        name="precio"
+        placeholder="Precio"
+        required
+      /><br />
+      <button type="submit">Guardar Cambios</button>
+    </form>
+    <div style="text-align: center">
+      <a href="../index.html">Menu principal</a>
+    </div>
+
+    <script>
+      const URL = "https://matiasraspa.pythonanywhere.com/";
+      // Capturar el evento de envío del formulario
+      document
+        .getElementById("formulario")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // Evitar que se recargue la página
+          // Obtener los valores actualizados del formulario
+          var codigo = document.getElementById("codigo").value;
+          var descripcion = document.getElementById("descripcion").value;
+          var cantidad = document.getElementById("cantidad").value;
+          var precio = document.getElementById("precio").value;
+          // Crear un objeto con los datos actualizados del producto
+          var producto = {
+            descripcion: descripcion,
+            cantidad: cantidad,
+            precio: precio,
+          };
+          console.log(producto);
+          // Realizar la solicitud PUT al servidor para actualizar el producto
+          fetch(`${URL}productos/${codigo}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(producto),
+          })
+            .then(function (response) {
+              if (response.ok) {
+                return response.json(); // Parsear la respuesta JSON
+              } else {
+                throw new Error("Error al modificar el producto.");
+              }
+            })
+            .then(function (data) {
+              alert("Producto modificado correctamente.");
+              document.getElementById("codigo").value = "";
+              document.getElementById("descripcion").value = "";
+              document.getElementById("cantidad").value = "";
+              document.getElementById("precio").value = "";
+            })
+            .catch(function (error) {
+              console.log("Error:", error);
+              alert("Error al modificar el producto.");
+            });
+        });
+    </script>
+  </body>
+</html>

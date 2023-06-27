@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/estilos.css" />
+    <title>Eliminar productos</title>
+  </head>
+  <body>
+    <h1>Eliminar Productos</h1>
+    <h3>Codo a Codo 2023</h3>
+    <table id="tabla-productos">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-productos">
+        <!-- Los productos se cargarán dinámicamente aquí -->
+      </tbody>
+    </table>
+    <div style="text-align: center">
+      <a href="../index.html">Menu principal</a>
+    </div>
+
+    <script>
+      const URL = "https://matiasraspa.pythonanywhere.com/";
+      // Obtener los productos del inventario y mostrarlos en la tabla
+      fetch(URL + "productos")
+        .then(function (response) {
+          if (response.ok) {
+            return response.json(); // Parsear la respuesta JSON
+          } else {
+            throw new Error("Error al obtener los productos.");
+          }
+        })
+        .then(function (data) {
+          const tbody = document.getElementById("tbody-productos");
+          data.forEach(function (producto) {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td>${producto.codigo}</td>
+            <td>${producto.descripcion}</td>
+            <td>${producto.cantidad}</td>
+            <td>${producto.precio}</td>
+            <td>
+              <button onclick="eliminarProducto('${producto.codigo}')">Eliminar</button>
+            </td>
+          `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(function (error) {
+          console.log("Error:", error);
+          alert("Error al obtener los productos.");
+        });
+
+      // Función para eliminar un producto
+      function eliminarProducto(codigo) {
+        alerta = confirm("¿Confirmas que quieres eliminar este producto?");
+        if (alerta) {
+          // Realizar la solicitud DELETE al servidor
+          fetch(`${URL}productos/${codigo}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then(function (response) {
+              if (response.ok) {
+                return response.json(); // Parsear la respuesta JSON
+              } else {
+                throw new Error("Error al eliminar el producto.");
+              }
+            })
+            .then(function (data) {
+              alert("Producto eliminado correctamente.");
+              // Recargar página
+              location.reload();
+            })
+            .catch(function (error) {
+              console.log("Error:", error);
+              alert("Error al eliminar el producto.");
+            });
+        }
+      }
+    </script>
+  </body>
+</html>
